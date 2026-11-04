@@ -47,3 +47,17 @@ def test_all_pairs_delivered_to_the_right_host():
         assert len(host.received) == 7
         for packet, _ in host.received:
             assert packet.dst == name
+
+
+def test_uplinks_are_balanced():
+    sim, net = make()
+    pid = 0
+    for src in net.hosts:
+        for dst in net.hosts:
+            if src != dst:
+                net.send(Packet(pid, src, dst, 4096, 0))
+                pid += 1
+    sim.run()
+    to_s0 = net.links[("L0", "S0")].packets_sent
+    to_s1 = net.links[("L0", "S1")].packets_sent
+    assert to_s0 == to_s1
